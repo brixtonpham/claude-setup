@@ -51,7 +51,7 @@ echo ""
 # ═══════════════════════════════════════════════════════════════════════
 # Step 0: Sync ~/.ccp from git
 # ═══════════════════════════════════════════════════════════════════════
-log "Step 1/5: Syncing CCP from git..."
+log "Step 1/6: Syncing CCP from git..."
 
 if [[ -d "$CCP_DIR/.git" ]]; then
   git -C "$CCP_DIR" fetch origin main 2>/dev/null
@@ -72,7 +72,7 @@ fi
 # ═══════════════════════════════════════════════════════════════════════
 # Step 1: Install mise
 # ═══════════════════════════════════════════════════════════════════════
-log "Step 2/5: Setting up mise..."
+log "Step 2/6: Setting up mise..."
 
 # Ensure LOCALAPPDATA is set (Git Bash may not have it)
 if [[ -z "${LOCALAPPDATA:-}" && "$OS" == "windows" ]]; then
@@ -124,7 +124,7 @@ fi
 # ═══════════════════════════════════════════════════════════════════════
 # Step 2: Install tools via mise
 # ═══════════════════════════════════════════════════════════════════════
-log "Step 3/5: Installing tools via mise..."
+log "Step 3/6: Installing tools via mise..."
 if command -v mise &>/dev/null; then
   mkdir -p "$HOME/.config/mise"
   cp -f "$CCP_DIR/setup/mise-config.toml" "$HOME/.config/mise/config.toml"
@@ -155,7 +155,7 @@ fi
 # ═══════════════════════════════════════════════════════════════════════
 # Step 3: Install ProxyPal (desktop app for managing CLIProxyAPI)
 # ═══════════════════════════════════════════════════════════════════════
-log "Step 4/5: Setting up ProxyPal..."
+log "Step 4/6: Setting up ProxyPal..."
 
 install_proxypal() {
   local PROXYPAL_REPO="heyhuynhgiabuu/proxypal"
@@ -235,7 +235,7 @@ fi
 # ═══════════════════════════════════════════════════════════════════════
 # Step 4: MCP servers + Shell integration
 # ═══════════════════════════════════════════════════════════════════════
-log "Step 5/5: MCP servers & shell integration..."
+log "Step 5/6: MCP servers & shell integration..."
 
 # MCP servers
 CLAUDE_JSON="$HOME/.claude.json"
@@ -297,6 +297,59 @@ fi
 log "Shell integration configured."
 
 # ═══════════════════════════════════════════════════════════════════════
+# Step 6: Start proxy + login Antigravity
+# ═══════════════════════════════════════════════════════════════════════
+log "Step 6: Starting CLIProxyAPI + Antigravity login..."
+
+# Find cli-proxy-api binary
+PROXY_BIN=""
+if command -v cli-proxy-api &>/dev/null; then
+  PROXY_BIN="cli-proxy-api"
+elif command -v mise &>/dev/null; then
+  PROXY_BIN="$(mise which cli-proxy-api 2>/dev/null || true)"
+fi
+
+if [[ -n "$PROXY_BIN" && -f "$PROXY_CONFIG" ]]; then
+  # Kill existing proxy on port 8317
+  if [[ "$OS" == "windows" ]]; then
+    local_pid=$(netstat.exe -ano 2>/dev/null | grep ":8317.*LISTENING" | awk '{print $5}' | head -1)
+    [[ -n "$local_pid" ]] && taskkill.exe //PID "$local_pid" //F 2>/dev/null || true
+  else
+    lsof -ti:8317 2>/dev/null | xargs kill -9 2>/dev/null || true
+  fi
+  sleep 1
+
+  # Start proxy in background
+  "$PROXY_BIN" -config "$PROXY_CONFIG" &
+  PROXY_PID=$!
+  sleep 2
+
+  if kill -0 "$PROXY_PID" 2>/dev/null; then
+    log "CLIProxyAPI running on port 8317 (PID: $PROXY_PID)"
+
+    # Antigravity login
+    info "Opening Antigravity login in browser..."
+    "$PROXY_BIN" -config "$PROXY_CONFIG" --antigravity-login 2>/dev/null &
+    sleep 3
+
+    # Check if tokens exist
+    if ls "$PROXY_CONFIG_DIR"/antigravity-*.json 2>/dev/null | head -1 &>/dev/null; then
+      log "Antigravity tokens found. Ready to use Claude!"
+    else
+      warn "No Antigravity tokens found yet."
+      info "Login via browser, or run manually:"
+      info "  $PROXY_BIN -config $PROXY_CONFIG --antigravity-login"
+    fi
+  else
+    warn "CLIProxyAPI failed to start. Run manually:"
+    info "  $PROXY_BIN -config $PROXY_CONFIG"
+  fi
+else
+  warn "cli-proxy-api not found or config missing."
+  info "After setup, run: mise exec -- cli-proxy-api -config ~/.cli-proxy-api/config.yaml"
+fi
+
+# ═══════════════════════════════════════════════════════════════════════
 # Done!
 # ═══════════════════════════════════════════════════════════════════════
 echo ""
@@ -304,16 +357,16 @@ echo "╔═══════════════════════�
 echo "║            Setup Complete!               ║"
 echo "╠══════════════════════════════════════════╣"
 echo "║  1. Restart your terminal                ║"
-echo "║  2. Open ProxyPal app → login providers  ║"
+echo "║  2. Login Antigravity in browser         ║"
 echo "║  3. Run: claude                          ║"
 echo "╚══════════════════════════════════════════╝"
 echo ""
 
+info "Proxy is running on port 8317."
+info "To start Claude:"
 if [[ "$OS" == "windows" ]]; then
-  info "Windows: ProxyPal installer should be running."
-  info "After installing, open ProxyPal and login to your providers."
+  info "  mise exec -- claude"
+else
+  info "  claude"
 fi
-
-info "ProxyPal runs CLIProxyAPI on port 8317 automatically."
-info "Once ProxyPal is running, just type 'claude' to start."
 echo ""
