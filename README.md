@@ -13,54 +13,54 @@ Managed by [CCP (Claude Code Profile)](https://github.com/samhvw8/claude-code-pr
 | **Hooks** | 5 hooks (session-start, agent-skills-eval, websearch, etc.) |
 | **Settings** | Proxy config, model routing, permissions, plugins |
 
-## Setup on New Machine (Windows)
+## Quick Setup (One Command)
+
+```bash
+git clone https://github.com/brixtonpham/claude-setup ~/.ccp && bash ~/.ccp/setup.sh
+```
+
+This single command will:
+1. Install mise (if missing)
+2. Copy mise config & install all tools (node, python, claude-code, ccp, CLIProxyAPI, etc.)
+3. Activate the `default` CCP profile
+4. Install external skill sources (vercel-labs, wshobson, etc.)
+5. Configure MCP servers (context7, grep, stitch)
+6. Add shell integration to your `.bashrc`/`.zshrc`
+
+After setup, restart your terminal and run:
+```bash
+cli-proxy-api &   # Start proxy in background
+claude            # Launch Claude Code
+```
+
+## Manual Setup (Step by Step)
+
+<details>
+<summary>Click to expand manual steps</summary>
 
 ### Prerequisites
 
-```powershell
-# 1. Install Git for Windows (includes Git Bash)
-winget install Git.Git
+```bash
+# Windows
+winget install Git.Git GitHub.cli jdx.mise
 
-# 2. Install GitHub CLI
-winget install GitHub.cli
+# macOS
+brew install mise gh
+
+# Then authenticate GitHub
 gh auth login
-
-# 3. Install mise
-# See: https://mise.jdx.dev/getting-started/
-winget install jdx.mise
-
-# 4. Add mise to your shell
-# PowerShell: Add to $PROFILE
-# Git Bash: Add to ~/.bashrc
-eval "$(mise activate bash)"   # bash
-eval "$(mise activate zsh)"    # zsh
-# For PowerShell, see: https://mise.jdx.dev/getting-started/#powershell
 ```
 
-### Install Core Tools
-
-```powershell
-# Copy mise config to your machine
-mkdir -p ~/.config/mise
-cp setup/mise-config.toml ~/.config/mise/config.toml
-
-# Install all tools (node, python, go, claude-code, CLIProxyAPI, ccp, etc.)
-mise install
-```
-
-### Clone & Activate CCP
+### Install Tools & Activate Profile
 
 ```bash
-# Clone this repo as your CCP directory
-git clone https://github.com/<your-username>/claude-setup ~/.ccp
-
-# Activate the default profile
+mkdir -p ~/.config/mise
+cp ~/.ccp/setup/mise-config.toml ~/.config/mise/config.toml
+mise install
 ccp use default
 ```
 
 ### Install External Skill Sources
-
-These are git-cloned by CCP and excluded from this repo:
 
 ```bash
 ccp install github:nextlevelbuilder/ui-ux-pro-max-skill
@@ -69,41 +69,26 @@ ccp install github:wshobson/agents
 ccp install github:remorses/playwriter
 ```
 
-### Start the Proxy
-
-```bash
-# CLIProxyAPI runs on port 8317
-cli-proxy-api
-```
-
 ### Shell Integration
 
-**Git Bash** (`~/.bashrc`):
+**Bash/Zsh**: Add to `~/.bashrc` or `~/.zshrc`:
 ```bash
-# Source the provided shell integration
-source ~/.ccp/setup/shell-integration.sh
+source "$HOME/.ccp/setup/shell-integration.sh"
 ```
 
-**PowerShell** (`$PROFILE`):
+**PowerShell**: Add to `$PROFILE`:
 ```powershell
-# Source the provided PowerShell integration
 . ~/.ccp/setup/shell-integration.ps1
 ```
 
 ### MCP Servers
 
-Add MCP servers after Claude Code is running:
-
+The setup script creates `~/.claude.json` with MCP configs. Update the Stitch API key:
 ```bash
-# Context7 - Library documentation
-claude mcp add context7 -- npx -y @upstash/context7-mcp@latest
-
-# Grep - GitHub search
-claude mcp add grep -- npx -y @anthropic/grep-mcp
-
-# Stitch - UI generation
-claude mcp add stitch -- npx -y @anthropic/stitch-mcp
+# Edit ~/.claude.json and replace REPLACE_WITH_YOUR_STITCH_API_KEY
 ```
+
+</details>
 
 ## Windows-Specific Notes
 
