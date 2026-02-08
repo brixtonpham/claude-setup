@@ -287,6 +287,13 @@ add_line_if_missing "$SHELL_RC" "mise activate" \
   "# mise
 eval \"\$(mise activate $SHELL_NAME)\""
 
+# On Windows, mise activate clobbers system PATH - fix it after activation
+if [[ "$OS" == "windows" ]]; then
+  add_line_if_missing "$SHELL_RC" "mingw64/bin" \
+    '# Fix PATH after mise activate (Windows/Git Bash)
+[[ ":$PATH:" != *":/usr/bin:"* ]] && export PATH="/usr/bin:/bin:/mingw64/bin:$PATH"'
+fi
+
 log "Shell integration configured."
 
 # ═══════════════════════════════════════════════════════════════════════

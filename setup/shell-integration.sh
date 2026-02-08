@@ -2,6 +2,13 @@
 # Shell integration for Claude Code with CCP
 # Source this from ~/.bashrc or ~/.zshrc
 
+# Fix PATH on Windows (mise activate can clobber system bins)
+case "$(uname -s)" in
+  MINGW*|MSYS*|CYGWIN*)
+    [[ ":$PATH:" != *":/usr/bin:"* ]] && export PATH="/usr/bin:/bin:/mingw64/bin:$PATH"
+    ;;
+esac
+
 # Ensure mise shims are in PATH (makes cli-proxy-api, claude, ccp available)
 if [[ -d "${LOCALAPPDATA:-$HOME/AppData/Local}/mise/shims" ]]; then
   # Windows (Git Bash)
