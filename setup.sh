@@ -1,21 +1,16 @@
 #!/usr/bin/env bash
 #
-# Claude Code Setup - chezmoi-style sync
+# Claude Code Full Setup - One command to rule them all
 #
-# Fresh install:
+# Usage:
 #   curl -sL https://raw.githubusercontent.com/brixtonpham/claude-setup/main/setup.sh | bash
-#
-# Update/re-sync (already have ~/.ccp):
-#   bash ~/.ccp/setup.sh
-#
-# Or the classic:
-#   git clone https://github.com/brixtonpham/claude-setup ~/.ccp && bash ~/.ccp/setup.sh
+#   bash ~/.ccp/setup.sh          # re-sync
 #
 set -euo pipefail
 
 # Fix PATH on Windows (mise/winget can clobber it)
 case "$(uname -s)" in
-  MINGW*|MSYS*|CYGWIN*) export PATH="/usr/bin:/bin:$PATH";;
+  MINGW*|MSYS*|CYGWIN*) export PATH="/usr/bin:/bin:/mingw64/bin:$PATH";;
 esac
 
 REPO="https://github.com/brixtonpham/claude-setup.git"
@@ -48,61 +43,62 @@ echo "║       OS: $OS | Shell: $SHELL_NAME              ║"
 echo "╚══════════════════════════════════════════╝"
 echo ""
 
-# ─────────────────────────────────────────────────────────────────────
-# Step 0: Sync ~/.ccp from git (nuke old, pull fresh)
-# ─────────────────────────────────────────────────────────────────────
-log "Syncing CCP from git..."
+# ═══════════════════════════════════════════════════════════════════════
+# Step 0: Sync ~/.ccp from git
+# ═══════════════════════════════════════════════════════════════════════
+log "Step 1/7: Syncing CCP from git..."
 
 if [[ -d "$CCP_DIR/.git" ]]; then
-  # Already a git repo - hard reset to remote
-  log "Existing repo found. Pulling latest..."
   cd "$CCP_DIR"
   git fetch origin main 2>/dev/null
   git reset --hard origin/main 2>/dev/null
   git clean -fd 2>/dev/null
   log "Synced to latest remote."
 elif [[ -d "$CCP_DIR" ]]; then
-  # Exists but not a git repo - backup and replace
-  warn "~/.ccp exists but is not a git repo."
   BACKUP="$HOME/.ccp.bak.$(date +%s)"
-  warn "Backing up to $BACKUP"
+  warn "Backing up existing ~/.ccp to $BACKUP"
   mv "$CCP_DIR" "$BACKUP"
   git clone "$REPO" "$CCP_DIR"
   log "Fresh clone complete."
 else
-  # Fresh install
   git clone "$REPO" "$CCP_DIR"
   log "Cloned to $CCP_DIR"
 fi
 
-# ─────────────────────────────────────────────────────────────────────
-# Step 1: mise
-# ─────────────────────────────────────────────────────────────────────
-log "Checking mise..."
+# ═══════════════════════════════════════════════════════════════════════
+# Step 1: Install mise
+# ═══════════════════════════════════════════════════════════════════════
+log "Step 2/7: Setting up mise..."
+
+# Try to find mise in common locations first
+for p in \
+  "$LOCALAPPDATA/mise/bin" \
+  "$LOCALAPPDATA/Programs/mise" \
+  "$HOME/AppData/Local/mise/bin" \
+  "$HOME/.local/bin" \
+  "$HOME/.local/bin/mise/bin"; do
+  [[ -d "$p" ]] && export PATH="$p:$PATH"
+done
+
 if ! command -v mise &>/dev/null; then
   if [[ "$OS" == "windows" ]]; then
-    if command -v winget &>/dev/null; then
+    # Try winget first (runs in cmd.exe, available even in Git Bash)
+    if command -v winget.exe &>/dev/null || [[ -f "/c/Users/$(whoami)/AppData/Local/Microsoft/WindowsApps/winget.exe" ]]; then
       log "Installing mise via winget..."
-      winget install jdx.mise --accept-source-agreements --accept-package-agreements 2>&1 || true
-      # winget installs to Program Files or AppData - add common paths
-      for p in \
-        "$LOCALAPPDATA/Programs/mise" \
-        "$HOME/AppData/Local/Programs/mise" \
-        "/c/Program Files/mise/bin" \
-        "$HOME/.local/bin"; do
+      winget.exe install jdx.mise --accept-source-agreements --accept-package-agreements 2>&1 || true
+      # Re-scan paths after winget install
+      for p in "$LOCALAPPDATA/mise/bin" "$LOCALAPPDATA/Programs/mise" "$HOME/AppData/Local/mise/bin"; do
         [[ -d "$p" ]] && export PATH="$p:$PATH"
       done
     else
-      warn "winget not found. Trying GitHub release install..."
-      # Direct download fallback for Windows without winget
+      log "Installing mise from GitHub releases..."
       MISE_VERSION=$(curl -fsSL "https://api.github.com/repos/jdx/mise/releases/latest" | grep '"tag_name"' | head -1 | cut -d'"' -f4)
-      MISE_URL="https://github.com/jdx/mise/releases/download/${MISE_VERSION}/mise-${MISE_VERSION}-windows-x64.zip"
       MISE_DIR="$HOME/.local/bin"
       mkdir -p "$MISE_DIR"
-      curl -fsSL "$MISE_URL" -o /tmp/mise.zip
+      curl -fsSL "https://github.com/jdx/mise/releases/download/${MISE_VERSION}/mise-${MISE_VERSION}-windows-x64.zip" -o /tmp/mise.zip
       unzip -o /tmp/mise.zip -d "$MISE_DIR" 2>/dev/null || true
       rm -f /tmp/mise.zip
-      export PATH="$MISE_DIR:$PATH"
+      export PATH="$MISE_DIR:$MISE_DIR/mise/bin:$PATH"
     fi
   else
     curl -fsSL https://mise.jdx.dev/install.sh | sh
@@ -110,79 +106,121 @@ if ! command -v mise &>/dev/null; then
   fi
 fi
 
-if ! command -v mise &>/dev/null; then
-  warn "mise not in PATH yet. You may need to restart your terminal."
-  warn "Then re-run: bash ~/.ccp/setup.sh"
-  # Continue anyway - other steps may still work
-else
+if command -v mise &>/dev/null; then
   log "mise: $(mise --version)"
+else
+  warn "mise not in PATH yet. Will continue, but some steps may be skipped."
 fi
 
-# ─────────────────────────────────────────────────────────────────────
-# Step 2: mise config & tools
-# ─────────────────────────────────────────────────────────────────────
-log "Installing mise config & tools..."
-mkdir -p "$HOME/.config/mise"
-cp -f "$CCP_DIR/setup/mise-config.toml" "$HOME/.config/mise/config.toml"
-mise install --yes 2>&1 | tail -3 || warn "Some tools may have failed. Run 'mise install' again later."
+# ═══════════════════════════════════════════════════════════════════════
+# Step 2: Install tools via mise
+# ═══════════════════════════════════════════════════════════════════════
+log "Step 3/7: Installing tools via mise..."
+if command -v mise &>/dev/null; then
+  mkdir -p "$HOME/.config/mise"
+  cp -f "$CCP_DIR/setup/mise-config.toml" "$HOME/.config/mise/config.toml"
+  mise install --yes 2>&1 | tail -5 || warn "Some tools failed. Run 'mise install' later."
 
-# Activate for rest of script
-eval "$(mise activate bash 2>/dev/null || true)"
-eval "$(mise env 2>/dev/null || true)"
-# Also add shims to PATH so tools are available immediately
-if [[ -d "$LOCALAPPDATA/mise/shims" ]]; then
-  export PATH="$LOCALAPPDATA/mise/shims:$PATH"
-elif [[ -d "$HOME/.local/share/mise/shims" ]]; then
-  export PATH="$HOME/.local/share/mise/shims:$PATH"
+  # Activate mise for rest of script
+  eval "$(mise activate bash 2>/dev/null || true)"
+  eval "$(mise env 2>/dev/null || true)"
+
+  # Add shims to PATH
+  if [[ -d "$LOCALAPPDATA/mise/shims" ]]; then
+    export PATH="$LOCALAPPDATA/mise/shims:$PATH"
+  elif [[ -d "$HOME/.local/share/mise/shims" ]]; then
+    export PATH="$HOME/.local/share/mise/shims:$PATH"
+  fi
+  mise reshim 2>/dev/null || true
+  log "Tools installed."
+else
+  warn "Skipping mise install (mise not available)."
 fi
 
-# ─────────────────────────────────────────────────────────────────────
-# Step 3: CLIProxyAPI config
-# ─────────────────────────────────────────────────────────────────────
-log "Setting up CLIProxyAPI config..."
+# ═══════════════════════════════════════════════════════════════════════
+# Step 3: Install ProxyPal (desktop app for managing CLIProxyAPI)
+# ═══════════════════════════════════════════════════════════════════════
+log "Step 4/7: Setting up ProxyPal..."
+
+install_proxypal() {
+  local PROXYPAL_REPO="heyhuynhgiabuu/proxypal"
+  local LATEST
+  LATEST=$(curl -fsSL "https://api.github.com/repos/$PROXYPAL_REPO/releases/latest" 2>/dev/null | grep '"tag_name"' | head -1 | cut -d'"' -f4)
+
+  if [[ -z "$LATEST" ]]; then
+    warn "Could not fetch ProxyPal latest version."
+    return 1
+  fi
+  # Strip 'v' prefix if present
+  local VER="${LATEST#v}"
+
+  case "$OS" in
+    windows)
+      local EXE_NAME="ProxyPal_${VER}_x64-setup.exe"
+      local DL_URL="https://github.com/$PROXYPAL_REPO/releases/download/${LATEST}/${EXE_NAME}"
+      local DL_PATH="/tmp/$EXE_NAME"
+
+      log "Downloading ProxyPal $VER for Windows..."
+      curl -fsSL "$DL_URL" -o "$DL_PATH" || { warn "Download failed: $DL_URL"; return 1; }
+      log "Downloaded. Launching installer..."
+      info "  Please complete the ProxyPal installer wizard."
+
+      # Launch installer (runs in Windows, not Git Bash)
+      cmd.exe /c "$(cygpath -w "$DL_PATH")" 2>/dev/null &
+      ;;
+    mac)
+      local DMG_NAME="ProxyPal_${VER}_aarch64.dmg"
+      local DL_URL="https://github.com/$PROXYPAL_REPO/releases/download/${LATEST}/${DMG_NAME}"
+      local DL_PATH="/tmp/$DMG_NAME"
+
+      log "Downloading ProxyPal $VER for macOS..."
+      curl -fsSL "$DL_URL" -o "$DL_PATH" || { warn "Download failed"; return 1; }
+      log "Downloaded. Opening installer..."
+      open "$DL_PATH"
+      ;;
+    linux)
+      local DEB_NAME="proxy-pal_${VER}_amd64.deb"
+      local DL_URL="https://github.com/$PROXYPAL_REPO/releases/download/${LATEST}/${DEB_NAME}"
+      local DL_PATH="/tmp/$DEB_NAME"
+
+      log "Downloading ProxyPal $VER for Linux..."
+      curl -fsSL "$DL_URL" -o "$DL_PATH" || { warn "Download failed"; return 1; }
+      sudo dpkg -i "$DL_PATH" 2>/dev/null || sudo apt-get install -f -y 2>/dev/null
+      ;;
+  esac
+}
+
+# Check if ProxyPal is already installed
+PROXYPAL_INSTALLED=false
+case "$OS" in
+  windows)
+    [[ -d "$LOCALAPPDATA/ProxyPal" ]] || [[ -d "$APPDATA/ProxyPal" ]] || \
+    [[ -f "/c/Program Files/ProxyPal/ProxyPal.exe" ]] && PROXYPAL_INSTALLED=true
+    ;;
+  mac)
+    [[ -d "/Applications/ProxyPal.app" ]] || [[ -d "$HOME/Applications/ProxyPal.app" ]] && PROXYPAL_INSTALLED=true
+    ;;
+esac
+
+if $PROXYPAL_INSTALLED; then
+  log "ProxyPal already installed."
+else
+  install_proxypal || warn "ProxyPal install failed. Download manually: https://github.com/heyhuynhgiabuu/proxypal/releases"
+fi
+
+# Also install proxy config as fallback (for CLI usage without ProxyPal)
 PROXY_CONFIG_DIR="$HOME/.cli-proxy-api"
 PROXY_CONFIG="$PROXY_CONFIG_DIR/config.yaml"
-
 mkdir -p "$PROXY_CONFIG_DIR"
 if [[ ! -f "$PROXY_CONFIG" ]]; then
   cp "$CCP_DIR/setup/proxy-config.yaml" "$PROXY_CONFIG"
-  log "Proxy config installed to $PROXY_CONFIG"
-  info "  Auth dir: $PROXY_CONFIG_DIR"
-  info "  Port: 8317"
-else
-  info "Proxy config already exists at $PROXY_CONFIG"
+  log "CLI proxy config installed to $PROXY_CONFIG"
 fi
 
-# Create start-proxy helper script
-cat > "$CCP_DIR/start-proxy.sh" <<'PROXYEOF'
-#!/usr/bin/env bash
-# Start CLIProxyAPI with the correct config
-CONFIG="$HOME/.cli-proxy-api/config.yaml"
-if [[ ! -f "$CONFIG" ]]; then
-  echo "Config not found: $CONFIG"
-  echo "Run: bash ~/.ccp/setup.sh"
-  exit 1
-fi
-echo "Starting CLIProxyAPI on port 8317..."
-exec cli-proxy-api -config "$CONFIG"
-PROXYEOF
-chmod +x "$CCP_DIR/start-proxy.sh" 2>/dev/null || true
-
-# Login to providers if needed
-if command -v cli-proxy-api &>/dev/null; then
-  if [[ ! -d "$PROXY_CONFIG_DIR" ]] || [[ -z "$(ls -A "$PROXY_CONFIG_DIR"/*.json 2>/dev/null)" ]]; then
-    warn "No OAuth tokens found. Login to providers:"
-    info "  cli-proxy-api -config $PROXY_CONFIG -antigravity-login"
-    info "  cli-proxy-api -config $PROXY_CONFIG -codex-login"
-  else
-    info "OAuth tokens found in $PROXY_CONFIG_DIR"
-  fi
-fi
-
-# ─────────────────────────────────────────────────────────────────────
-# Step 4: CCP profile
-# ─────────────────────────────────────────────────────────────────────
-log "Activating CCP profile..."
+# ═══════════════════════════════════════════════════════════════════════
+# Step 4: Activate CCP profile
+# ═══════════════════════════════════════════════════════════════════════
+log "Step 5/7: Activating CCP profile..."
 if command -v ccp &>/dev/null; then
   ccp use default
   log "Profile 'default' active."
@@ -190,10 +228,10 @@ else
   warn "ccp not in PATH. After restart: ccp use default"
 fi
 
-# ─────────────────────────────────────────────────────────────────────
-# Step 4: External sources
-# ─────────────────────────────────────────────────────────────────────
-log "Installing external skill sources..."
+# ═══════════════════════════════════════════════════════════════════════
+# Step 5: Install external skill sources
+# ═══════════════════════════════════════════════════════════════════════
+log "Step 6/7: Installing external skill sources..."
 if command -v ccp &>/dev/null; then
   for src in \
     "github:nextlevelbuilder/ui-ux-pro-max-skill" \
@@ -210,12 +248,13 @@ else
   warn '  ccp install github:remorses/playwriter'
 fi
 
-# ─────────────────────────────────────────────────────────────────────
-# Step 5: MCP servers (~/.claude.json)
-# ─────────────────────────────────────────────────────────────────────
-log "Configuring MCP servers..."
-CLAUDE_JSON="$HOME/.claude.json"
+# ═══════════════════════════════════════════════════════════════════════
+# Step 6: MCP servers + Shell integration
+# ═══════════════════════════════════════════════════════════════════════
+log "Step 7/7: MCP servers & shell integration..."
 
+# MCP servers
+CLAUDE_JSON="$HOME/.claude.json"
 if [[ ! -f "$CLAUDE_JSON" ]]; then
   cat > "$CLAUDE_JSON" <<'EOF'
 {
@@ -245,15 +284,11 @@ else
   info "MCP config exists - keeping current $CLAUDE_JSON"
 fi
 
-# ─────────────────────────────────────────────────────────────────────
-# Step 6: Shell integration (idempotent)
-# ─────────────────────────────────────────────────────────────────────
-log "Shell integration..."
-
+# Shell integration
 add_line_if_missing() {
   local file="$1" marker="$2" line="$3"
   if [[ -f "$file" ]] && grep -qF "$marker" "$file" 2>/dev/null; then
-    info "Already in $file: $marker"
+    return 0
   elif [[ -f "$file" ]] || touch "$file" 2>/dev/null; then
     printf '\n%s\n' "$line" >> "$file"
     log "Added to $file"
@@ -268,16 +303,26 @@ add_line_if_missing "$SHELL_RC" "mise activate" \
   "# mise
 eval \"\$(mise activate $SHELL_NAME)\""
 
-# ─────────────────────────────────────────────────────────────────────
-# Done
-# ─────────────────────────────────────────────────────────────────────
+log "Shell integration configured."
+
+# ═══════════════════════════════════════════════════════════════════════
+# Done!
+# ═══════════════════════════════════════════════════════════════════════
 echo ""
 echo "╔══════════════════════════════════════════╗"
-echo "║  Done! Restart terminal, then:           ║"
-echo "║    bash ~/.ccp/start-proxy.sh &          ║"
-echo "║    claude                                ║"
+echo "║            Setup Complete!               ║"
+echo "╠══════════════════════════════════════════╣"
+echo "║  1. Restart your terminal                ║"
+echo "║  2. Open ProxyPal app → login providers  ║"
+echo "║  3. Run: claude                          ║"
 echo "╚══════════════════════════════════════════╝"
 echo ""
-info "First time? Login to providers:"
-info "  cli-proxy-api -config ~/.cli-proxy-api/config.yaml -antigravity-login"
-[[ "$OS" == "windows" ]] && info "PowerShell users also: . ~/.ccp/setup/shell-integration.ps1"
+
+if [[ "$OS" == "windows" ]]; then
+  info "Windows: ProxyPal installer should be running."
+  info "After installing, open ProxyPal and login to your providers."
+fi
+
+info "ProxyPal runs CLIProxyAPI on port 8317 automatically."
+info "Once ProxyPal is running, just type 'claude' to start."
+echo ""
