@@ -319,30 +319,35 @@ if [[ -n "$PROXY_BIN" && -f "$PROXY_CONFIG" ]]; then
   fi
   sleep 1
 
-  # Start proxy in background
-  "$PROXY_BIN" -config "$PROXY_CONFIG" &
+  # Start proxy in background with nohup
+  nohup "$PROXY_BIN" -config "$PROXY_CONFIG" > /tmp/cli-proxy-api.log 2>&1 &
   PROXY_PID=$!
   sleep 2
 
   if kill -0 "$PROXY_PID" 2>/dev/null; then
     log "CLIProxyAPI running on port 8317 (PID: $PROXY_PID)"
 
-    # Antigravity login
-    info "Opening Antigravity login in browser..."
-    "$PROXY_BIN" -config "$PROXY_CONFIG" --antigravity-login 2>/dev/null &
-    sleep 3
-
-    # Check if tokens exist
-    if ls "$PROXY_CONFIG_DIR"/antigravity-*.json 2>/dev/null | head -1 &>/dev/null; then
+    # Check if Antigravity tokens already exist
+    if ls "$PROXY_CONFIG_DIR"/antigravity-*.json &>/dev/null; then
       log "Antigravity tokens found. Ready to use Claude!"
     else
-      warn "No Antigravity tokens found yet."
-      info "Login via browser, or run manually:"
-      info "  $PROXY_BIN -config $PROXY_CONFIG --antigravity-login"
+      # Need to login - open browser via management API
+      info "No Antigravity tokens found. Opening login..."
+      sleep 1
+      if [[ "$OS" == "windows" ]]; then
+        # Use Windows start to open browser
+        cmd.exe /c start http://127.0.0.1:8317/management/ 2>/dev/null || true
+      elif [[ "$OS" == "mac" ]]; then
+        open "http://127.0.0.1:8317/management/" 2>/dev/null || true
+      else
+        xdg-open "http://127.0.0.1:8317/management/" 2>/dev/null || true
+      fi
+      info "Login in browser at: http://127.0.0.1:8317/management/"
+      info "After login, restart terminal and run: claude"
     fi
   else
-    warn "CLIProxyAPI failed to start. Run manually:"
-    info "  $PROXY_BIN -config $PROXY_CONFIG"
+    warn "CLIProxyAPI failed to start. Check /tmp/cli-proxy-api.log"
+    info "Run manually: $PROXY_BIN -config $PROXY_CONFIG"
   fi
 else
   warn "cli-proxy-api not found or config missing."
