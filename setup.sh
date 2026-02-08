@@ -227,8 +227,18 @@ fi
 # Step 4: Activate CCP profile
 # ═══════════════════════════════════════════════════════════════════════
 log "Step 5/7: Activating CCP profile..."
-if command -v ccp &>/dev/null; then
-  ccp use default
+
+# Use mise exec on Windows (shims have PATH issues in Git Bash)
+run_tool() {
+  if [[ "$OS" == "windows" ]] && command -v mise &>/dev/null; then
+    mise exec -- "$@"
+  else
+    "$@"
+  fi
+}
+
+if command -v ccp &>/dev/null || (command -v mise &>/dev/null && mise which ccp &>/dev/null); then
+  run_tool ccp use default
   log "Profile 'default' active."
 else
   warn "ccp not in PATH. After restart: ccp use default"
@@ -238,13 +248,13 @@ fi
 # Step 5: Install external skill sources
 # ═══════════════════════════════════════════════════════════════════════
 log "Step 6/7: Installing external skill sources..."
-if command -v ccp &>/dev/null; then
+if command -v ccp &>/dev/null || (command -v mise &>/dev/null && mise which ccp &>/dev/null); then
   for src in \
     "github:nextlevelbuilder/ui-ux-pro-max-skill" \
     "github:vercel-labs/next-skills" \
     "github:wshobson/agents" \
     "github:remorses/playwriter"; do
-    ccp install "$src" 2>&1 || warn "Failed: $src"
+    run_tool ccp install "$src" 2>&1 || warn "Failed: $src"
   done
 else
   warn "ccp not available. After restart, run:"
