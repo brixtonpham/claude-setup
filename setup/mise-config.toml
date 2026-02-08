@@ -27,7 +27,6 @@ pnpm = "latest"
 # CLI tools
 jq = "latest"
 ripgrep = "latest"
-rg = "latest"
 uv = "latest"
 yq = "latest"
 neovim = "0.11.4"

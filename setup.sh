@@ -33,7 +33,12 @@ esac
 SHELL_NAME="$(basename "${SHELL:-bash}")"
 case "$SHELL_NAME" in
   zsh)  SHELL_RC="$HOME/.zshrc";;
-  *)    SHELL_RC="$HOME/.bashrc";;
+  *)    SHELL_RC="$HOME/.bashrc"
+        # Git Bash on Windows sources .bash_profile, not .bashrc
+        if [[ "$OS" == "windows" ]]; then
+          SHELL_RC="$HOME/.bash_profile"
+        fi
+        ;;
 esac
 
 echo ""
@@ -49,10 +54,9 @@ echo ""
 log "Step 1/5: Syncing CCP from git..."
 
 if [[ -d "$CCP_DIR/.git" ]]; then
-  cd "$CCP_DIR"
-  git fetch origin main 2>/dev/null
-  git reset --hard origin/main 2>/dev/null
-  git clean -fd 2>/dev/null
+  git -C "$CCP_DIR" fetch origin main 2>/dev/null
+  git -C "$CCP_DIR" reset --hard origin/main 2>/dev/null
+  git -C "$CCP_DIR" clean -fd 2>/dev/null
   log "Synced to latest remote."
 elif [[ -d "$CCP_DIR" ]]; then
   BACKUP="$HOME/.ccp.bak.$(date +%s)"
@@ -70,10 +74,15 @@ fi
 # ═══════════════════════════════════════════════════════════════════════
 log "Step 2/5: Setting up mise..."
 
+# Ensure LOCALAPPDATA is set (Git Bash may not have it)
+if [[ -z "${LOCALAPPDATA:-}" && "$OS" == "windows" ]]; then
+  export LOCALAPPDATA="$HOME/AppData/Local"
+fi
+
 # Try to find mise in common locations first
 for p in \
-  "$LOCALAPPDATA/mise/bin" \
-  "$LOCALAPPDATA/Programs/mise" \
+  "${LOCALAPPDATA:-}/mise/bin" \
+  "${LOCALAPPDATA:-}/Programs/mise" \
   "$HOME/AppData/Local/mise/bin" \
   "$HOME/.local/bin" \
   "$HOME/.local/bin/mise/bin"; do
@@ -87,7 +96,7 @@ if ! command -v mise &>/dev/null; then
       log "Installing mise via winget..."
       winget.exe install jdx.mise --accept-source-agreements --accept-package-agreements 2>&1 || true
       # Re-scan paths after winget install
-      for p in "$LOCALAPPDATA/mise/bin" "$LOCALAPPDATA/Programs/mise" "$HOME/AppData/Local/mise/bin"; do
+      for p in "${LOCALAPPDATA:-}/mise/bin" "${LOCALAPPDATA:-}/Programs/mise" "$HOME/AppData/Local/mise/bin"; do
         [[ -d "$p" ]] && export PATH="$p:$PATH"
       done
     else
@@ -132,8 +141,8 @@ if command -v mise &>/dev/null; then
   export PATH="$PATH:$SYSTEM_PATH"
 
   # Add shims to PATH
-  if [[ -d "$LOCALAPPDATA/mise/shims" ]]; then
-    export PATH="$LOCALAPPDATA/mise/shims:$PATH"
+  if [[ -d "${LOCALAPPDATA:-}/mise/shims" ]]; then
+    export PATH="${LOCALAPPDATA:-}/mise/shims:$PATH"
   elif [[ -d "$HOME/.local/share/mise/shims" ]]; then
     export PATH="$HOME/.local/share/mise/shims:$PATH"
   fi
@@ -200,11 +209,11 @@ install_proxypal() {
 PROXYPAL_INSTALLED=false
 case "$OS" in
   windows)
-    [[ -d "$LOCALAPPDATA/ProxyPal" ]] || [[ -d "$APPDATA/ProxyPal" ]] || \
-    [[ -f "/c/Program Files/ProxyPal/ProxyPal.exe" ]] && PROXYPAL_INSTALLED=true
+    { [[ -d "${LOCALAPPDATA:-}/ProxyPal" ]] || [[ -d "${APPDATA:-}/ProxyPal" ]] || \
+      [[ -f "/c/Program Files/ProxyPal/ProxyPal.exe" ]]; } && PROXYPAL_INSTALLED=true
     ;;
   mac)
-    [[ -d "/Applications/ProxyPal.app" ]] || [[ -d "$HOME/Applications/ProxyPal.app" ]] && PROXYPAL_INSTALLED=true
+    { [[ -d "/Applications/ProxyPal.app" ]] || [[ -d "$HOME/Applications/ProxyPal.app" ]]; } && PROXYPAL_INSTALLED=true
     ;;
 esac
 

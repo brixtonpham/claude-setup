@@ -8,6 +8,7 @@ profiles/*/history.jsonl
 profiles/*/stats-cache.json
 profiles/*/.DS_Store
 profiles/*/cache/
+profiles/*/image-cache/
 .DS_Store
 
 # History (large, machine-specific)
