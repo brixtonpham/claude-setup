@@ -1,0 +1,44 @@
+# CLIProxyAPI config
+# See config.example.yaml for all options
+
+port: 8317
+debug: false
+
+# Auth directory - stores OAuth tokens
+# On Windows: uses ~/.cli-proxy-api
+# On macOS/Linux: uses ~/.cli-proxy-api
+auth-dir: "~/.cli-proxy-api"
+
+# API keys for client authentication
+api-keys:
+  - "proxypal-local"
+
+# Logging
+logging-to-file: false
+request-log: false
+
+# Management panel
+remote-management:
+  allow-remote: true
+  secret-key: ""
+  disable-control-panel: false
+
+# Reliability
+disable-cooling: true
+request-retry: 0
+max-retry-interval: 0
+
+# Auto-switch on quota exceeded
+quota-exceeded:
+  switch-project: true
+  switch-preview-model: true
+
+# Model aliases (Gemini -> Claude naming)
+oauth-model-alias:
+  antigravity:
+    - name: "claude-sonnet-4-5"
+      alias: "gemini-claude-sonnet-4-5"
+    - name: "claude-sonnet-4-5-thinking"
+      alias: "gemini-claude-sonnet-4-5-thinking"
+    - name: "claude-opus-4-5-thinking"
+      alias: "gemini-claude-opus-4-5-thinking"

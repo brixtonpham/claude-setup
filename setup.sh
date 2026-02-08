@@ -137,7 +137,36 @@ elif [[ -d "$HOME/.local/share/mise/shims" ]]; then
 fi
 
 # ─────────────────────────────────────────────────────────────────────
-# Step 3: CCP profile
+# Step 3: CCS (proxy manager) setup
+# ─────────────────────────────────────────────────────────────────────
+log "Setting up CCS (CLIProxyAPI manager)..."
+if command -v ccs &>/dev/null; then
+  log "CCS already installed: $(ccs --version 2>/dev/null || echo 'OK')"
+else
+  log "Installing CCS..."
+  if command -v npm &>/dev/null; then
+    npm install -g @kaitranntt/ccs 2>&1 | tail -2 || warn "CCS install failed"
+  elif command -v mise &>/dev/null; then
+    mise install "npm:@kaitranntt/ccs" 2>&1 | tail -2 || warn "CCS install via mise failed"
+  else
+    warn "npm not found. Install CCS manually: npm i -g @kaitranntt/ccs"
+  fi
+fi
+
+if command -v ccs &>/dev/null; then
+  # Run ccs doctor to generate cliproxy config
+  ccs doctor --fix 2>&1 | tail -3 || true
+  log "CCS configured. Run 'ccs' to open dashboard and login to providers."
+  info "  Then: ccs start (starts CLIProxyAPI on port 8317)"
+else
+  warn "CCS not available yet. After restart:"
+  warn "  npm i -g @kaitranntt/ccs"
+  warn "  ccs doctor --fix"
+  warn "  ccs start"
+fi
+
+# ─────────────────────────────────────────────────────────────────────
+# Step 4: CCP profile
 # ─────────────────────────────────────────────────────────────────────
 log "Activating CCP profile..."
 if command -v ccp &>/dev/null; then
@@ -231,8 +260,9 @@ eval \"\$(mise activate $SHELL_NAME)\""
 echo ""
 echo "╔══════════════════════════════════════════╗"
 echo "║  Done! Restart terminal, then:           ║"
-echo "║    cli-proxy-api &                       ║"
-echo "║    claude                                ║"
+echo "║    ccs start        # start proxy        ║"
+echo "║    claude           # launch Claude Code  ║"
 echo "╚══════════════════════════════════════════╝"
 echo ""
+info "First time? Run 'ccs' to open dashboard and login to providers (gemini, codex, etc.)"
 [[ "$OS" == "windows" ]] && info "PowerShell users also: . ~/.ccp/setup/shell-integration.ps1"
