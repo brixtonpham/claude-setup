@@ -10,7 +10,10 @@ set -euo pipefail
 
 # Fix PATH on Windows (mise/winget can clobber it)
 case "$(uname -s)" in
-  MINGW*|MSYS*|CYGWIN*) export PATH="/usr/bin:/bin:/mingw64/bin:$PATH";;
+  MINGW*|MSYS*|CYGWIN*)
+    WIN_USER="$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r' || whoami)"
+    export PATH="/usr/bin:/bin:/mingw64/bin:/c/Windows/System32:/c/Users/$WIN_USER/AppData/Local/Microsoft/WindowsApps:$PATH"
+    ;;
 esac
 
 REPO="https://github.com/brixtonpham/claude-setup.git"
@@ -92,7 +95,7 @@ done
 if ! command -v mise &>/dev/null; then
   if [[ "$OS" == "windows" ]]; then
     # Try winget first (runs in cmd.exe, available even in Git Bash)
-    if command -v winget.exe &>/dev/null || [[ -f "/c/Users/$(whoami)/AppData/Local/Microsoft/WindowsApps/winget.exe" ]]; then
+    if command -v winget.exe &>/dev/null || [[ -f "/c/Users/$WIN_USER/AppData/Local/Microsoft/WindowsApps/winget.exe" ]]; then
       log "Installing mise via winget..."
       winget.exe install jdx.mise --accept-source-agreements --accept-package-agreements 2>&1 || true
       # Re-scan paths after winget install
@@ -291,7 +294,9 @@ eval \"\$(mise activate $SHELL_NAME)\""
 if [[ "$OS" == "windows" ]]; then
   add_line_if_missing "$SHELL_RC" "mingw64/bin" \
     '# Fix PATH after mise activate (Windows/Git Bash)
-[[ ":$PATH:" != *":/usr/bin:"* ]] && export PATH="/usr/bin:/bin:/mingw64/bin:$PATH"'
+_win_user="$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '"'"'\r'"'"' || whoami)"
+[[ ":$PATH:" != *":/usr/bin:"* ]] && export PATH="/usr/bin:/bin:/mingw64/bin:/c/Windows/System32:/c/Users/$_win_user/AppData/Local/Microsoft/WindowsApps:$PATH"
+unset _win_user'
 fi
 
 log "Shell integration configured."

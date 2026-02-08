@@ -5,7 +5,9 @@
 # Fix PATH on Windows (mise activate can clobber system bins)
 case "$(uname -s)" in
   MINGW*|MSYS*|CYGWIN*)
-    [[ ":$PATH:" != *":/usr/bin:"* ]] && export PATH="/usr/bin:/bin:/mingw64/bin:$PATH"
+    _win_user="$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r' || whoami)"
+    [[ ":$PATH:" != *":/usr/bin:"* ]] && export PATH="/usr/bin:/bin:/mingw64/bin:/c/Windows/System32:/c/Users/$_win_user/AppData/Local/Microsoft/WindowsApps:$PATH"
+    unset _win_user
     ;;
 esac
 
