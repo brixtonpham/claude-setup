@@ -15,6 +15,8 @@ Managed by [CCP (Claude Code Profile)](https://github.com/samhvw8/claude-code-pr
 
 ## Setup (One Command)
 
+### Bash (macOS / Linux / Git Bash on Windows)
+
 **Fresh install:**
 ```bash
 curl -sL https://raw.githubusercontent.com/brixtonpham/claude-setup/main/setup.sh | bash
@@ -25,9 +27,27 @@ curl -sL https://raw.githubusercontent.com/brixtonpham/claude-setup/main/setup.s
 git clone https://github.com/brixtonpham/claude-setup ~/.ccp && bash ~/.ccp/setup.sh
 ```
 
-**Update / re-sync (nuke old setup, pull latest):**
+**Update / re-sync:**
 ```bash
 bash ~/.ccp/setup.sh
+```
+
+### PowerShell (Windows native)
+
+**Fresh install:**
+```powershell
+irm https://raw.githubusercontent.com/brixtonpham/claude-setup/main/setup.ps1 | iex
+```
+
+**Or with git clone:**
+```powershell
+git clone https://github.com/brixtonpham/claude-setup "$env:USERPROFILE\.ccp"
+& "$env:USERPROFILE\.ccp\setup.ps1"
+```
+
+**Update / re-sync:**
+```powershell
+& "$env:USERPROFILE\.ccp\setup.ps1"
 ```
 
 The script auto-detects your situation:
