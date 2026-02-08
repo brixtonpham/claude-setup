@@ -13,6 +13,11 @@
 #
 set -euo pipefail
 
+# Fix PATH on Windows (mise/winget can clobber it)
+case "$(uname -s)" in
+  MINGW*|MSYS*|CYGWIN*) export PATH="/usr/bin:/bin:$PATH";;
+esac
+
 REPO="https://github.com/brixtonpham/claude-setup.git"
 CCP_DIR="$HOME/.ccp"
 
