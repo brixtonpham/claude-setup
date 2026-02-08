@@ -129,6 +129,12 @@ mise install --yes 2>&1 | tail -3 || warn "Some tools may have failed. Run 'mise
 # Activate for rest of script
 eval "$(mise activate bash 2>/dev/null || true)"
 eval "$(mise env 2>/dev/null || true)"
+# Also add shims to PATH so tools are available immediately
+if [[ -d "$LOCALAPPDATA/mise/shims" ]]; then
+  export PATH="$LOCALAPPDATA/mise/shims:$PATH"
+elif [[ -d "$HOME/.local/share/mise/shims" ]]; then
+  export PATH="$HOME/.local/share/mise/shims:$PATH"
+fi
 
 # ─────────────────────────────────────────────────────────────────────
 # Step 3: CCP profile

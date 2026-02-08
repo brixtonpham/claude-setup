@@ -2,6 +2,15 @@
 # Shell integration for Claude Code with CCP
 # Source this from ~/.bashrc or ~/.zshrc
 
+# Ensure mise shims are in PATH (makes cli-proxy-api, claude, ccp available)
+if [[ -d "$LOCALAPPDATA/mise/shims" ]]; then
+  # Windows (Git Bash)
+  export PATH="$LOCALAPPDATA/mise/shims:$PATH"
+elif [[ -d "$HOME/.local/share/mise/shims" ]]; then
+  # macOS / Linux
+  export PATH="$HOME/.local/share/mise/shims:$PATH"
+fi
+
 # Only load if ccp is installed
 if command -v ccp &> /dev/null; then
   # Claude alias - loads profile's CLAUDE.md and rules
