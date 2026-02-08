@@ -121,9 +121,15 @@ if command -v mise &>/dev/null; then
   cp -f "$CCP_DIR/setup/mise-config.toml" "$HOME/.config/mise/config.toml"
   mise install --yes 2>&1 | tail -5 || warn "Some tools failed. Run 'mise install' later."
 
+  # Save system PATH before mise activation (mise can clobber it on Windows)
+  SYSTEM_PATH="/usr/bin:/bin:/mingw64/bin:/usr/sbin:/sbin"
+
   # Activate mise for rest of script
   eval "$(mise activate bash 2>/dev/null || true)"
   eval "$(mise env 2>/dev/null || true)"
+
+  # Re-add system paths (mise activate can remove them on Windows/Git Bash)
+  export PATH="$PATH:$SYSTEM_PATH"
 
   # Add shims to PATH
   if [[ -d "$LOCALAPPDATA/mise/shims" ]]; then
