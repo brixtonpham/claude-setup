@@ -1,5 +1,5 @@
 # ProxyPal/CLIProxyAPI config (cross-platform)
-# Original from: ~/Library/Application Support/proxypal/proxy-config.yaml
+# Copy of Mac config with cross-platform auth-dir
 port: 8317
 auth-dir: "~/.cli-proxy-api"
 api-keys:
@@ -38,6 +38,10 @@ payload:
         - name: "claude-opus-4-5"
           protocol: "claude"
         - name: "claude-opus-4-5-thinking"
+          protocol: "claude"
+        - name: "claude-opus-4-6"
+          protocol: "claude"
+        - name: "claude-opus-4-6-thinking"
           protocol: "claude"
       params:
         "thinking.budget_tokens": 32768
