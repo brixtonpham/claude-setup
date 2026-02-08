@@ -13,19 +13,29 @@ Managed by [CCP (Claude Code Profile)](https://github.com/samhvw8/claude-code-pr
 | **Hooks** | 5 hooks (session-start, agent-skills-eval, websearch, etc.) |
 | **Settings** | Proxy config, model routing, permissions, plugins |
 
-## Quick Setup (One Command)
+## Setup (One Command)
 
+**Fresh install:**
+```bash
+curl -sL https://raw.githubusercontent.com/brixtonpham/claude-setup/main/setup.sh | bash
+```
+
+**Or with git clone:**
 ```bash
 git clone https://github.com/brixtonpham/claude-setup ~/.ccp && bash ~/.ccp/setup.sh
 ```
 
-This single command will:
-1. Install mise (if missing)
-2. Copy mise config & install all tools (node, python, claude-code, ccp, CLIProxyAPI, etc.)
-3. Activate the `default` CCP profile
-4. Install external skill sources (vercel-labs, wshobson, etc.)
-5. Configure MCP servers (context7, grep, stitch)
-6. Add shell integration to your `.bashrc`/`.zshrc`
+**Update / re-sync (nuke old setup, pull latest):**
+```bash
+bash ~/.ccp/setup.sh
+```
+
+The script auto-detects your situation:
+- No `~/.ccp` → fresh clone
+- `~/.ccp` is a git repo → `git fetch + reset --hard` (like chezmoi)
+- `~/.ccp` exists but not git → backup to `~/.ccp.bak.*`, then fresh clone
+
+Then it installs everything: mise, tools, CCP profile, external sources, MCP servers, shell integration.
 
 After setup, restart your terminal and run:
 ```bash
@@ -127,8 +137,12 @@ The proxy routes requests through CLIProxyAPI on `localhost:8317`:
 
 ## Updating
 
+Re-run the setup script - it pulls latest and re-applies everything:
 ```bash
-cd ~/.ccp
-git pull
-ccp use default  # Re-apply profile after pulling changes
+bash ~/.ccp/setup.sh
+```
+
+Or manual pull:
+```bash
+cd ~/.ccp && git pull && ccp use default
 ```
