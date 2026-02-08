@@ -46,7 +46,7 @@ echo ""
 # ═══════════════════════════════════════════════════════════════════════
 # Step 0: Sync ~/.ccp from git
 # ═══════════════════════════════════════════════════════════════════════
-log "Step 1/7: Syncing CCP from git..."
+log "Step 1/5: Syncing CCP from git..."
 
 if [[ -d "$CCP_DIR/.git" ]]; then
   cd "$CCP_DIR"
@@ -68,7 +68,7 @@ fi
 # ═══════════════════════════════════════════════════════════════════════
 # Step 1: Install mise
 # ═══════════════════════════════════════════════════════════════════════
-log "Step 2/7: Setting up mise..."
+log "Step 2/5: Setting up mise..."
 
 # Try to find mise in common locations first
 for p in \
@@ -115,7 +115,7 @@ fi
 # ═══════════════════════════════════════════════════════════════════════
 # Step 2: Install tools via mise
 # ═══════════════════════════════════════════════════════════════════════
-log "Step 3/7: Installing tools via mise..."
+log "Step 3/5: Installing tools via mise..."
 if command -v mise &>/dev/null; then
   mkdir -p "$HOME/.config/mise"
   cp -f "$CCP_DIR/setup/mise-config.toml" "$HOME/.config/mise/config.toml"
@@ -146,7 +146,7 @@ fi
 # ═══════════════════════════════════════════════════════════════════════
 # Step 3: Install ProxyPal (desktop app for managing CLIProxyAPI)
 # ═══════════════════════════════════════════════════════════════════════
-log "Step 4/7: Setting up ProxyPal..."
+log "Step 4/5: Setting up ProxyPal..."
 
 install_proxypal() {
   local PROXYPAL_REPO="heyhuynhgiabuu/proxypal"
@@ -224,50 +224,9 @@ if [[ ! -f "$PROXY_CONFIG" ]]; then
 fi
 
 # ═══════════════════════════════════════════════════════════════════════
-# Step 4: Activate CCP profile
+# Step 4: MCP servers + Shell integration
 # ═══════════════════════════════════════════════════════════════════════
-log "Step 5/7: Activating CCP profile..."
-
-# Use mise exec on Windows (shims have PATH issues in Git Bash)
-run_tool() {
-  if [[ "$OS" == "windows" ]] && command -v mise &>/dev/null; then
-    mise exec -- "$@"
-  else
-    "$@"
-  fi
-}
-
-if command -v ccp &>/dev/null || (command -v mise &>/dev/null && mise which ccp &>/dev/null); then
-  run_tool ccp use default
-  log "Profile 'default' active."
-else
-  warn "ccp not in PATH. After restart: ccp use default"
-fi
-
-# ═══════════════════════════════════════════════════════════════════════
-# Step 5: Install external skill sources
-# ═══════════════════════════════════════════════════════════════════════
-log "Step 6/7: Installing external skill sources..."
-if command -v ccp &>/dev/null || (command -v mise &>/dev/null && mise which ccp &>/dev/null); then
-  for src in \
-    "github:nextlevelbuilder/ui-ux-pro-max-skill" \
-    "github:vercel-labs/next-skills" \
-    "github:wshobson/agents" \
-    "github:remorses/playwriter"; do
-    run_tool ccp install "$src" 2>&1 || warn "Failed: $src"
-  done
-else
-  warn "ccp not available. After restart, run:"
-  warn '  ccp install github:nextlevelbuilder/ui-ux-pro-max-skill'
-  warn '  ccp install github:vercel-labs/next-skills'
-  warn '  ccp install github:wshobson/agents'
-  warn '  ccp install github:remorses/playwriter'
-fi
-
-# ═══════════════════════════════════════════════════════════════════════
-# Step 6: MCP servers + Shell integration
-# ═══════════════════════════════════════════════════════════════════════
-log "Step 7/7: MCP servers & shell integration..."
+log "Step 5/5: MCP servers & shell integration..."
 
 # MCP servers
 CLAUDE_JSON="$HOME/.claude.json"
