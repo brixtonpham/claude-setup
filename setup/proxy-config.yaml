@@ -1,0 +1,68 @@
+# ProxyPal/CLIProxyAPI config (cross-platform)
+# Original from: ~/Library/Application Support/proxypal/proxy-config.yaml
+port: 8317
+auth-dir: "~/.cli-proxy-api"
+api-keys:
+  - "proxypal-local"
+debug: false
+usage-statistics-enabled: true
+logging-to-file: true
+logs-max-total-size-mb: 100
+request-retry: 0
+max-retry-interval: 0
+# Quota exceeded behavior
+quota-exceeded:
+  switch-project: false
+  switch-preview-model: false
+# Enable Management API for OAuth flows
+remote-management:
+  allow-remote: true
+  secret-key: ""
+  disable-control-panel: true
+  panel-github-repository: https://github.com/router-for-me/Cli-Proxy-API-Management-Center
+# Routing strategy for multiple API keys
+routing:
+  strategy: "round-robin"
+# Payload injection for thinking models
+payload:
+  default:
+    # Antigravity Claude models - thinking budget
+    - models:
+        - name: "claude-sonnet-4-5"
+          protocol: "claude"
+        - name: "claude-sonnet-4-5-thinking"
+          protocol: "claude"
+      params:
+        "thinking.budget_tokens": 32768
+    - models:
+        - name: "claude-opus-4-5"
+          protocol: "claude"
+        - name: "claude-opus-4-5-thinking"
+          protocol: "claude"
+      params:
+        "thinking.budget_tokens": 32768
+# Amp CLI Integration
+ampcode:
+  upstream-url: "https://ampcode.com"
+  restrict-management-to-localhost: false
+  force-model-mappings: true
+# Additional settings
+request-log: true
+commercial-mode: false
+ws-auth: false
+oauth-model-alias:
+  antigravity:
+    - name: rev19-uic3-1p
+      alias: gemini-2.5-computer-use-preview-10-2025
+    - name: gemini-3-pro-image
+      alias: gemini-3-pro-image-preview
+    - name: gemini-3-pro-high
+      alias: gemini-3-pro-preview
+    - name: gemini-3-flash
+      alias: gemini-3-flash-preview
+    - name: claude-sonnet-4-5
+      alias: gemini-claude-sonnet-4-5
+    - name: claude-sonnet-4-5-thinking
+      alias: gemini-claude-sonnet-4-5-thinking
+    - name: claude-opus-4-5-thinking
+      alias: gemini-claude-opus-4-5-thinking

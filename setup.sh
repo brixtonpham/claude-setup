@@ -137,32 +137,46 @@ elif [[ -d "$HOME/.local/share/mise/shims" ]]; then
 fi
 
 # ─────────────────────────────────────────────────────────────────────
-# Step 3: CCS (proxy manager) setup
+# Step 3: CLIProxyAPI config
 # ─────────────────────────────────────────────────────────────────────
-log "Setting up CCS (CLIProxyAPI manager)..."
-if command -v ccs &>/dev/null; then
-  log "CCS already installed: $(ccs --version 2>/dev/null || echo 'OK')"
+log "Setting up CLIProxyAPI config..."
+PROXY_CONFIG_DIR="$HOME/.cli-proxy-api"
+PROXY_CONFIG="$PROXY_CONFIG_DIR/config.yaml"
+
+mkdir -p "$PROXY_CONFIG_DIR"
+if [[ ! -f "$PROXY_CONFIG" ]]; then
+  cp "$CCP_DIR/setup/proxy-config.yaml" "$PROXY_CONFIG"
+  log "Proxy config installed to $PROXY_CONFIG"
+  info "  Auth dir: $PROXY_CONFIG_DIR"
+  info "  Port: 8317"
 else
-  log "Installing CCS..."
-  if command -v npm &>/dev/null; then
-    npm install -g @kaitranntt/ccs 2>&1 | tail -2 || warn "CCS install failed"
-  elif command -v mise &>/dev/null; then
-    mise install "npm:@kaitranntt/ccs" 2>&1 | tail -2 || warn "CCS install via mise failed"
-  else
-    warn "npm not found. Install CCS manually: npm i -g @kaitranntt/ccs"
-  fi
+  info "Proxy config already exists at $PROXY_CONFIG"
 fi
 
-if command -v ccs &>/dev/null; then
-  # Run ccs doctor to generate cliproxy config
-  ccs doctor --fix 2>&1 | tail -3 || true
-  log "CCS configured. Run 'ccs' to open dashboard and login to providers."
-  info "  Then: ccs start (starts CLIProxyAPI on port 8317)"
-else
-  warn "CCS not available yet. After restart:"
-  warn "  npm i -g @kaitranntt/ccs"
-  warn "  ccs doctor --fix"
-  warn "  ccs start"
+# Create start-proxy helper script
+cat > "$CCP_DIR/start-proxy.sh" <<'PROXYEOF'
+#!/usr/bin/env bash
+# Start CLIProxyAPI with the correct config
+CONFIG="$HOME/.cli-proxy-api/config.yaml"
+if [[ ! -f "$CONFIG" ]]; then
+  echo "Config not found: $CONFIG"
+  echo "Run: bash ~/.ccp/setup.sh"
+  exit 1
+fi
+echo "Starting CLIProxyAPI on port 8317..."
+exec cli-proxy-api -config "$CONFIG"
+PROXYEOF
+chmod +x "$CCP_DIR/start-proxy.sh" 2>/dev/null || true
+
+# Login to providers if needed
+if command -v cli-proxy-api &>/dev/null; then
+  if [[ ! -d "$PROXY_CONFIG_DIR" ]] || [[ -z "$(ls -A "$PROXY_CONFIG_DIR"/*.json 2>/dev/null)" ]]; then
+    warn "No OAuth tokens found. Login to providers:"
+    info "  cli-proxy-api -config $PROXY_CONFIG -antigravity-login"
+    info "  cli-proxy-api -config $PROXY_CONFIG -codex-login"
+  else
+    info "OAuth tokens found in $PROXY_CONFIG_DIR"
+  fi
 fi
 
 # ─────────────────────────────────────────────────────────────────────
@@ -260,9 +274,10 @@ eval \"\$(mise activate $SHELL_NAME)\""
 echo ""
 echo "╔══════════════════════════════════════════╗"
 echo "║  Done! Restart terminal, then:           ║"
-echo "║    ccs start        # start proxy        ║"
-echo "║    claude           # launch Claude Code  ║"
+echo "║    bash ~/.ccp/start-proxy.sh &          ║"
+echo "║    claude                                ║"
 echo "╚══════════════════════════════════════════╝"
 echo ""
-info "First time? Run 'ccs' to open dashboard and login to providers (gemini, codex, etc.)"
+info "First time? Login to providers:"
+info "  cli-proxy-api -config ~/.cli-proxy-api/config.yaml -antigravity-login"
 [[ "$OS" == "windows" ]] && info "PowerShell users also: . ~/.ccp/setup/shell-integration.ps1"
