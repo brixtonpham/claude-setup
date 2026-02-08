@@ -1,0 +1,128 @@
+{
+  "numStartups": 10,
+  "installMethod": "native",
+  "autoUpdates": false,
+  "tipsHistory": {
+    "new-user-warmup": 3,
+    "plan-mode-for-complex-tasks": 3,
+    "terminal-setup": 3,
+    "memory-command": 3,
+    "theme-command": 3,
+    "prompt-queue": 3,
+    "enter-to-steer-in-relatime": 8,
+    "todo-list": 8,
+    "ide-upsell-external-terminal": 8,
+    "install-github-app": 8,
+    "install-slack-app": 8,
+    "drag-and-drop-images": 8,
+    "paste-images-mac": 9,
+    "double-esc-code-restore": 9,
+    "continue": 9
+  },
+  "cachedGrowthBookFeatures": {
+    "tengu_1p_event_batch_config": {
+      "scheduledDelayMillis": 5000,
+      "maxExportBatchSize": 200,
+      "maxQueueSize": 8192
+    },
+    "tengu_scratch": false,
+    "tengu_brass_pebble": false,
+    "tengu_disable_bypass_permissions_mode": false,
+    "tengu_event_sampling_config": {},
+    "tengu_log_segment_events": false,
+    "tengu_log_datadog_events": true,
+    "tengu_marble_anvil": true,
+    "tengu_tool_pear": false,
+    "tengu_scarf_coffee": false,
+    "tengu_keybinding_customization_release": true,
+    "tengu_thinkback": false,
+    "tengu_chrome_auto_enable": false,
+    "tengu_c4w_usage_limit_notifications_enabled": true,
+    "tengu-top-of-feed-tip": {
+      "tip": "",
+      "color": ""
+    },
+    "tengu_react_vulnerability_warning": false,
+    "tengu_code_diff_cli": true,
+    "tengu_pr_status_cli": true,
+    "tengu_post_compact_survey": false,
+    "tengu_claudeai_mcp_connectors": false,
+    "tengu_marble_kite": false,
+    "tengu_tool_search_unsupported_models": [
+      "haiku"
+    ],
+    "tengu_system_prompt_global_cache": false,
+    "tengu_attribution_header": false,
+    "enhanced_telemetry_beta": false,
+    "tengu_workout": false,
+    "tengu_pid_based_version_locking": true,
+    "tengu_coral_fern": false,
+    "tengu_cache_plum_violet": false,
+    "tengu_streaming_tool_execution2": true,
+    "tengu_plan_mode_interview_phase": false
+  },
+  "userID": "0f26645186df81e62dfc78149f62c3aea18fd7b3764b111d581f4f9306faf71d",
+  "firstStartTime": "2026-02-01T09:20:22.786Z",
+  "sonnet45MigrationComplete": true,
+  "sonnet45MigrationTimestamp": 1769937622788,
+  "opus45MigrationComplete": true,
+  "opusProMigrationComplete": true,
+  "thinkingMigrationComplete": true,
+  "cachedChromeExtensionInstalled": true,
+  "changelogLastFetched": 1769937873340,
+  "hasCompletedOnboarding": true,
+  "lastOnboardingVersion": "2.1.29",
+  "projects": {
+    "/Users/namu10x/workspace/skkn-genie": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {},
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": true,
+      "projectOnboardingSeenCount": 1,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "hasClaudeMdExternalIncludesWarningShown": false,
+      "reactVulnerabilityCache": {
+        "detected": false,
+        "package": null,
+        "packageName": null,
+        "version": null,
+        "packageManager": null
+      },
+      "exampleFiles": [
+        "SKKNForm.tsx",
+        "agentOrchestrator.ts",
+        "Index.tsx",
+        "History.tsx",
+        "types.ts"
+      ],
+      "exampleFilesGeneratedAt": 1769937874338,
+      "lastCost": 0,
+      "lastAPIDuration": 0,
+      "lastAPIDurationWithoutRetries": 0,
+      "lastToolDuration": 0,
+      "lastDuration": 11741,
+      "lastLinesAdded": 0,
+      "lastLinesRemoved": 0,
+      "lastTotalInputTokens": 0,
+      "lastTotalOutputTokens": 0,
+      "lastTotalCacheCreationInputTokens": 0,
+      "lastTotalCacheReadInputTokens": 0,
+      "lastTotalWebSearchRequests": 0,
+      "lastFpsAverage": 31.58,
+      "lastFpsLow1Pct": 361.68,
+      "lastModelUsage": {},
+      "lastSessionId": "172c20bf-710f-4992-b957-b499a6fb13d0"
+    }
+  },
+  "githubRepoPaths": {
+    "brixtonpham/skkn-genie": [
+      "/Users/namu10x/workspace/skkn-genie"
+    ]
+  },
+  "lastReleaseNotesSeen": "2.1.29",
+  "autoUpdatesProtectedForNative": true,
+  "officialMarketplaceAutoInstallAttempted": true,
+  "officialMarketplaceAutoInstalled": true
+}

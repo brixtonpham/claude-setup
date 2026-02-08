@@ -1,0 +1,1 @@
+../../../hub/agents/svelte-kit-architect.md

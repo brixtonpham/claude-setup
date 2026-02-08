@@ -1,0 +1,20 @@
+version = 2
+name = 'nextjs'
+created = 2026-02-01T16:16:09.691436+07:00
+updated = 2026-02-01T16:39:37.176622+07:00
+
+[hub]
+skills = ['0-planning', '0-research', '0-sequential-thinking', '3d-graphics', 'ai-tools', 'git-workflow', 'next-best-practices', 'ui-ux-pro-max']
+agents = ['cto.md', 'devops-architect.md', 'nodejs-expert.md', 'react-next-architect.md', 'researcher.md', 'scout.md', 'security-engineer.md', 'system-architect.md', 'ui-ux-designer.md']
+hooks = ['force-agent-skills-eval', 'index', 'session-start']
+setting-fragments = ['attribution', 'env', 'model', 'permissions', 'plans-directory', 'status-line']
+
+[data]
+tasks = 'isolated'
+todos = 'isolated'
+paste-cache = 'shared'
+history = 'isolated'
+file-history = 'isolated'
+session-env = 'isolated'
+projects = 'isolated'
+plans = 'isolated'

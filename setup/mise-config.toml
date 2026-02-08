@@ -1,0 +1,85 @@
+# mise configuration - copy to ~/.config/mise/config.toml
+# See: https://mise.jdx.dev/configuration.html
+
+[settings]
+experimental = true
+legacy_version_file_disable_tools = ['java']
+idiomatic_version_file_enable_tools = ["node"]
+
+[settings.npm]
+package_manager = "pnpm"
+
+[settings.pipx]
+uvx = true
+
+[settings.cargo]
+binstall = true
+
+[tools]
+# Core runtimes
+node = "22"
+python = "3.11"
+go = "1.25.1"
+rust = "latest"
+bun = "latest"
+pnpm = "latest"
+
+# CLI tools
+jq = "latest"
+ripgrep = "latest"
+rg = "latest"
+uv = "latest"
+yq = "latest"
+neovim = "0.11.4"
+lazygit = "latest"
+starship = "latest"
+zoxide = "latest"
+delta = "latest"
+usage = "latest"
+ast-grep = "latest"
+shellcheck = "latest"
+shfmt = "latest"
+
+# Claude Code ecosystem
+"github:router-for-me/CLIProxyAPI" = { version = "latest", exe = "cli-proxy-api" }
+"github:samhvw8/claude-code-profile" = "latest"
+gemini-cli = "latest"
+"npm:playwriter" = "latest"
+"npm:@kaitranntt/ccs" = "latest"
+"npm:ccusage" = "latest"
+
+# Claude Code binary (custom distribution)
+claude-code = { version = "latest", bin = "claude", platforms = """
+[linux-arm64]
+url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/{{ version }}/linux-arm64/claude"
+
+[linux-x64]
+url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/{{ version }}/linux-x64/claude"
+
+[macos-arm64]
+url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/{{ version }}/darwin-arm64/claude"
+
+[macos-x64]
+url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/{{ version }}/darwin-x64/claude"
+
+[windows-x64]
+bin = "claude.exe"
+url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/{{ version }}/win32-x64/claude.exe"
+""", version_list_url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/latest" }
+
+# Infrastructure / DevOps (optional - uncomment if needed)
+# kubectl = "latest"
+# k9s = "latest"
+# cloudflared = "latest"
+# rclone = "latest"
+# git-lfs = "latest"
+# k6 = "latest"
+# hurl = "latest"
+
+# Other tools (optional)
+# chezmoi = "latest"
+# direnv = "latest"
+# zig = "0.11.0"
+# yt-dlp = "latest"
+# doggo = "latest"
+# jnv = "latest"

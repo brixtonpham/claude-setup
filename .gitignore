@@ -1,0 +1,40 @@
+# Session data (machine-specific, regenerated)
+profiles/*/debug/
+profiles/*/session-env/
+profiles/*/file-history/
+profiles/*/shell-snapshots/
+profiles/*/telemetry/
+profiles/*/history.jsonl
+profiles/*/stats-cache.json
+profiles/*/.DS_Store
+profiles/*/cache/
+.DS_Store
+
+# History (large, machine-specific)
+profiles/*/history/
+
+# Shared transient data
+profiles/shared/paste-cache/
+profiles/shared/tasks/
+profiles/shared/todos/
+
+# Plugin cache (reinstallable via ccp)
+profiles/*/plugins/
+store/
+
+# Git-cloned sources (will re-clone via ccp install)
+sources/
+
+# Plans (local/temporary)
+profiles/*/plans/
+profiles/*/.claude/
+
+# Local overrides (machine-specific settings)
+profiles/*/settings.local.json
+
+# Project-specific data (machine-specific paths)
+profiles/*/projects/
+
+# Todos and tasks (transient)
+profiles/*/todos/
+profiles/*/tasks/

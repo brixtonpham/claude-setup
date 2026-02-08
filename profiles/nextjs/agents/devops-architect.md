@@ -1,0 +1,1 @@
+../../../hub/agents/devops-architect.md

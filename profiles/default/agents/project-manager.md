@@ -1,0 +1,1 @@
+../../../hub/agents/project-manager.md

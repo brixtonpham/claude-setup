@@ -1,0 +1,22 @@
+version = 1
+
+[sources]
+[sources.'vercel-labs/next-skills']
+registry = 'github'
+provider = 'git'
+url = 'https://github.com/vercel-labs/next-skills.git'
+path = '/Users/namu10x/.ccp/sources/vercel-labs--next-skills'
+ref = 'main'
+commit = '31e6ebd130eb63a0310d04c66f7e8d4f2bdd3196'
+updated = 2026-02-01T16:36:59.068235+07:00
+installed = ['skills/next-best-practices']
+
+[sources.'wshobson/agents']
+registry = 'github'
+provider = 'git'
+url = 'https://github.com/wshobson/agents.git'
+path = '/Users/namu10x/.ccp/sources/wshobson--agents'
+ref = 'main'
+commit = 'cbb60494b1df88ff43bff46821df5e71af6883c7'
+updated = 2026-02-01T16:38:56.689245+07:00
+installed = ['skills/python-development-python-performance-optimization']

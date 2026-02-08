@@ -1,0 +1,91 @@
+{
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "proxypal-local",
+    "ANTHROPIC_BASE_URL": "http://127.0.0.1:8317",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "gemini-2.5-flash-lite",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "gemini-claude-opus-4-5-thinking",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "gemini-claude-sonnet-4-5-thinking",
+    "ANTHROPIC_MODEL": "gemini-claude-opus-4-5-thinking",
+    "ENABLE_EXPERIMENTAL_MCP_CLI": "true"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "WebSearch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node $HOME/.ccp/profiles/nextjs/hooks/index/scripts/index.cjs",
+            "timeout": 300
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $HOME/.ccp/profiles/nextjs/hooks/session-start/scripts/session-start.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $HOME/.ccp/profiles/nextjs/hooks/force-agent-skills-eval/scripts/force-agent-skills-eval.sh",
+            "timeout": 220
+          }
+        ]
+      }
+    ]
+  },
+  "model": "opus",
+  "permissions": {
+    "allow": [
+      "Bash(cat:*)",
+      "Bash(chmod:*)",
+      "Bash(curl:*)",
+      "Bash(echo:*)",
+      "Bash(git:*)",
+      "Bash(go:*)",
+      "Bash(head:*)",
+      "Bash(ls:*)",
+      "Bash(lsof:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(npm run:*)",
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(python3:*)",
+      "Bash(rg:*)",
+      "Bash(sed:*)",
+      "Bash(source:*)",
+      "Bash(tail:*)",
+      "Read(~/.zshrc)",
+      "Skill(prompt-enhancer)",
+      "Skill(skill-developer)",
+      "Update(*:*)",
+      "WebFetch(domain:*)",
+      "WebSearch",
+      "Write(*)",
+      "mcp__chrome-mcp-server",
+      "mcp__context7"
+    ],
+    "defaultMode": "plan",
+    "deny": []
+  },
+  "plansDirectory": ".claude/plans",
+  "statusLine": {
+    "command": "node $(ls -td $HOME/.claude/plugins/cache/claude-hud/claude-hud/*/ 2>/dev/null | head -1)dist/index.js",
+    "type": "command"
+  }
+}

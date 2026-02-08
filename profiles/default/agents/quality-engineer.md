@@ -1,0 +1,1 @@
+../../../hub/agents/quality-engineer.md

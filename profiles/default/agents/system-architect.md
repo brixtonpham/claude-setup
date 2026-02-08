@@ -1,0 +1,1 @@
+../../../hub/agents/system-architect.md
