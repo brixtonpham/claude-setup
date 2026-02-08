@@ -76,12 +76,42 @@ fi
 log "Checking mise..."
 if ! command -v mise &>/dev/null; then
   if [[ "$OS" == "windows" ]]; then
-    err "Install mise first: winget install jdx.mise"
+    if command -v winget &>/dev/null; then
+      log "Installing mise via winget..."
+      winget install jdx.mise --accept-source-agreements --accept-package-agreements 2>&1 || true
+      # winget installs to Program Files or AppData - add common paths
+      for p in \
+        "$LOCALAPPDATA/Programs/mise" \
+        "$HOME/AppData/Local/Programs/mise" \
+        "/c/Program Files/mise/bin" \
+        "$HOME/.local/bin"; do
+        [[ -d "$p" ]] && export PATH="$p:$PATH"
+      done
+    else
+      warn "winget not found. Trying GitHub release install..."
+      # Direct download fallback for Windows without winget
+      MISE_VERSION=$(curl -fsSL "https://api.github.com/repos/jdx/mise/releases/latest" | grep '"tag_name"' | head -1 | cut -d'"' -f4)
+      MISE_URL="https://github.com/jdx/mise/releases/download/${MISE_VERSION}/mise-${MISE_VERSION}-windows-x64.zip"
+      MISE_DIR="$HOME/.local/bin"
+      mkdir -p "$MISE_DIR"
+      curl -fsSL "$MISE_URL" -o /tmp/mise.zip
+      unzip -o /tmp/mise.zip -d "$MISE_DIR" 2>/dev/null || true
+      rm -f /tmp/mise.zip
+      export PATH="$MISE_DIR:$PATH"
+    fi
+  else
+    curl -fsSL https://mise.jdx.dev/install.sh | sh
+    export PATH="$HOME/.local/bin:$PATH"
   fi
-  curl -fsSL https://mise.jdx.dev/install.sh | sh
-  export PATH="$HOME/.local/bin:$PATH"
 fi
-log "mise: $(mise --version 2>/dev/null || echo 'installed, restart shell')"
+
+if ! command -v mise &>/dev/null; then
+  warn "mise not in PATH yet. You may need to restart your terminal."
+  warn "Then re-run: bash ~/.ccp/setup.sh"
+  # Continue anyway - other steps may still work
+else
+  log "mise: $(mise --version)"
+fi
 
 # ─────────────────────────────────────────────────────────────────────
 # Step 2: mise config & tools
