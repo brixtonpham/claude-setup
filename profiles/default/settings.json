@@ -3,11 +3,10 @@
     "ANTHROPIC_AUTH_TOKEN": "proxypal-local",
     "ANTHROPIC_BASE_URL": "http://127.0.0.1:8317",
     "ANTHROPIC_DEFAULT_HAIKU_MODEL": "gemini-2.5-flash-lite",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-6-thinking",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "gemini-claude-opus-4-6-thinking",
     "ANTHROPIC_DEFAULT_SONNET_MODEL": "gemini-claude-sonnet-4-5-thinking",
-    "ANTHROPIC_MODEL": "claude-opus-4-6-thinking",
-    "ENABLE_EXPERIMENTAL_MCP_CLI": "true",
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "true"
+    "ANTHROPIC_MODEL": "gemini-claude-opus-4-6-thinking",
+    "ENABLE_EXPERIMENTAL_MCP_CLI": "true"
   },
   "attribution": {
     "commit": "",
@@ -112,5 +111,6 @@
     "claude-hud@claude-hud": true,
     "context7@claude-plugins-official": true
   },
-  "plansDirectory": ".claude/plans"
+  "plansDirectory": ".claude/plans",
+  "skipDangerousModePermissionPrompt": true
 }

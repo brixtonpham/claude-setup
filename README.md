@@ -140,10 +140,10 @@ The proxy routes requests through CLIProxyAPI on `localhost:8317`:
 |---------|-------|
 | `ANTHROPIC_BASE_URL` | `http://127.0.0.1:8317` |
 | `ANTHROPIC_AUTH_TOKEN` | `proxypal-local` |
-| `ANTHROPIC_MODEL` | `gemini-claude-opus-4-5-thinking` |
+| `ANTHROPIC_MODEL` | `gemini-claude-opus-4-6-thinking` |
 | Default Haiku | `gemini-2.5-flash-lite` |
 | Default Sonnet | `gemini-claude-sonnet-4-5-thinking` |
-| Default Opus | `gemini-claude-opus-4-5-thinking` |
+| Default Opus | `gemini-claude-opus-4-6-thinking` |
 
 ## Verification Checklist
 

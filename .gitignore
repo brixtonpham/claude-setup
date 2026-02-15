@@ -39,3 +39,14 @@ profiles/*/projects/
 # Todos and tasks (transient)
 profiles/*/todos/
 profiles/*/tasks/
+
+# Claude session files (generated per-session)
+profiles/*/.claude.json
+profiles/*/.claude.json.backup.*
+
+# Agent teams (session-specific)
+profiles/*/teams/
+
+# Python cache
+__pycache__/
+*.pyc
